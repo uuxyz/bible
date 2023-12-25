@@ -10,7 +10,9 @@ elif [ $# -eq 2 ]; then
     echo ""
     for ((i=start; i<=end; i++)); do
         ./bible 1 $i
-        echo -n " "
+        if [ $i != $end ]; then
+            echo -n " "
+        fi
     done
     echo ""
 else
