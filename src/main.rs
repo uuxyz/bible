@@ -261,17 +261,54 @@ fn main() {
         println!("ERROR");
         return;
     }
-    let number_str = &args[1];
+    let mode_str = &args[1];
+    let mut have_verse = false;
+    let mut have_book_name = false;
+    let mut have_chapter_num = false;
+    let mut have_verse_num = false;
+    match mode_str.parse::<i32>() {
+        Ok(number) => {
+            have_verse = (number & 1) != 0;
+            have_book_name = (number & 2) != 0;
+            have_chapter_num = (number & 4) != 0;
+            have_verse_num = (number & 8) != 0;
+        }
+        Err(err) => {
+            println!("Error: {}", err);
+        }
+    }
+    let number_str = &args[2];
     match number_str.parse::<i32>() {
         Ok(number) => {
             let bible_index = number.rem_euclid(31102) as usize;
             match find_bible(bible_index) {
                 Ok((book, chapter, verse)) => {
-                    println!("{} {}:{}", book, chapter, verse);
-                    if let Some(line) = BIBLE_TEXT.lines().nth(bible_index) {
-                        println!("{}", line);
-                    } else {
-                        println!("Line {} not found", number);
+                    if have_book_name {
+                        print!("{}", book);
+                        if have_chapter_num || have_verse_num {
+                            print!(" ");
+                        }
+                    }
+                    if have_chapter_num {
+                        print!("{}", chapter);
+                    }
+                    if have_chapter_num && have_verse_num {
+                        print!(":");
+                    }
+                    if have_verse_num {
+                        print!("{}", verse);
+                    }
+                    if have_verse {
+                        if let Some(line) = BIBLE_TEXT.lines().nth(bible_index) {
+                            if have_book_name || have_chapter_num || have_verse_num {
+                                println!("");
+                                println!("{}", line);
+                            } else {
+                                print!("{}", line);
+                            }
+                        } else {
+                            println!("Line {} not found", number);
+                        }
                     }
                 }
                 Err(err) => {
